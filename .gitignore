@@ -1,0 +1,11 @@
+.env
+secrets.toml
+__pycache__/
+.pytest_cache/
+*.csv
+*.joblib
+*.pkl
+*.pdf
+*.hwpx
+*.log
+*.tmp

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; connect-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; frame-src 'self' blob:; form-action 'none'; base-uri 'none'">
+  <title>안전보건서류 작성</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+<main>
+  <header>
+    <h1>안전보건서류 작성</h1>
+    <p class="muted lead">작업명만 입력하면 AI 기반으로 작업유형을 분류하고, 안전문구와 필요한 서류까지 한 번에 생성합니다.</p>
+    <p id="status" class="muted runtime-status" role="status">브라우저 실행환경 준비 중… 입력정보는 이 브라우저에서만 처리됩니다.</p>
+  </header>
+  <noscript><p class="alert warning">브라우저의 JavaScript를 활성화해주세요. 기본정보 입력항목은 아래에서 확인할 수 있습니다.</p></noscript>
+  <nav class="step-menu" aria-label="작성 단계">
+    <button type="button" data-step="1" class="active" aria-current="step">① 기본정보</button>
+    <button type="button" data-step="2">② 유형·서류 선택</button>
+    <button type="button" data-step="3">③ 미리보기·저장</button>
+  </nav>
+  <section id="basic" class="card" aria-labelledby="basic-title">
+    <h2 id="basic-title">1. 기본정보 입력</h2>
+    <div class="two-columns">
+      <label for="company_name"><span class="required" aria-hidden="true">*</span> 업체명<input id="company_name" type="text" placeholder="예: (주)충남시설" aria-required="true" autocomplete="off"></label>
+      <label for="phone">연락처<input id="phone" type="text" placeholder="041-000-0000 (업체 전화번호)" autocomplete="off"></label>
+    </div>
+    <label for="contract_name"><span class="required" aria-hidden="true">*</span> 작업명<input id="contract_name" type="text" placeholder="예: 체육관 조명 교체" aria-required="true" autocomplete="off" aria-describedby="title-help"></label>
+    <p id="title-help" class="muted input-help">입력을 마친 뒤 Enter를 누르거나 다른 칸을 클릭하면 자동분류됩니다.</p>
+    <label for="school_name"><span class="required" aria-hidden="true">*</span> 학교(기관)명<input id="school_name" type="text" placeholder="예: 홍산중학교" aria-required="true" autocomplete="off"></label>
+    <div class="two-columns">
+      <label for="manager_name">업체 담당자<input id="manager_name" type="text" placeholder="업체 책임자 이름" autocomplete="off"></label>
+      <label for="inspector_name">학교 담당자<input id="inspector_name" type="text" placeholder="학교(기관) 담당자 이름" autocomplete="off"></label>
+    </div>
+    <p class="muted school-note">학교명과 학교 담당자는 이 브라우저에 자동 저장됩니다.<br>공용 PC에서는 사용 후 저장정보를 삭제해주세요.</p>
+    <button id="delete" type="button" class="small">저장정보 삭제</button>
+    <p id="school-feedback" class="muted" role="status" hidden></p>
+    <div class="period">
+      <label class="check-label"><input id="has_period" type="checkbox" checked> 작업기간 있음</label>
+      <div class="two-columns">
+        <label for="start_date">시작일<input id="start_date" type="date"></label>
+        <label for="end_date">종료일<input id="end_date" type="date"></label>
+      </div>
+      <p class="muted">시작일은 안전보건 점검표와 서약서 날짜에도 함께 사용됩니다.</p>
+    </div>
+  </section>
+  <button id="next_basic" type="button" class="primary wide">다음</button>
+  <section id="types" class="card" aria-labelledby="types-title">
+    <h2 id="types-title">유형·서류 선택</h2>
+    <div id="classification-group" hidden>
+      <p id="classification" class="alert" role="status"></p>
+      <p class="muted classification-note">AI 자동분류 결과는 참고용이며, 실제 작업 내용과 현장 여건에 맞게 확인 후 사용하시기 바랍니다.</p>
+    </div>
+    <label for="category">계약구분<select id="category" disabled><option>공사</option><option>용역</option><option selected>공통</option></select></label>
+    <label for="detail">세부유형<select id="detail" disabled><option>공통</option></select></label>
+    <p id="selection-help" class="muted" hidden>작업유형은 자동분류되며, 직접 선택도 가능합니다.</p>
+    <h2 class="subheading">위험요인 및 안전문구</h2>
+    <div id="risks" class="risk-grid">
+      <div class="risk-item"><label class="check-label"><input id="risk_추락" type="checkbox"> 추락 점검표</label><small id="state_추락"><span>확인 후 선택</span></small></div>
+      <div class="risk-item"><label class="check-label"><input id="risk_감전" type="checkbox"> 감전 점검표</label><small id="state_감전"><span>확인 후 선택</span></small></div>
+      <div class="risk-item"><label class="check-label"><input id="risk_질식" type="checkbox"> 질식 점검표</label><small id="state_질식"><span>확인 후 선택</span></small></div>
+      <div class="risk-item"><label class="check-label"><input id="risk_화재" type="checkbox"> 화재 점검표</label><small id="state_화재"><span>확인 후 선택</span></small></div>
+    </div>
+    <div class="auto-check-options"><label class="check-label"><input id="auto" type="checkbox" checked> 적정·예 자동 표시</label><p class="muted">선택한 점검표의 적정·예 항목을 표시합니다.</p></div>
+    <div id="messages" class="messages">
+      <label for="hazard_1">유해·위험요인 확인 1<textarea id="hazard_1" rows="2"></textarea></label>
+      <label for="hazard_2">유해·위험요인 확인 2<textarea id="hazard_2" rows="2"></textarea></label>
+      <label for="measure_1">안전·보건 관리대책 1<textarea id="measure_1" rows="2"></textarea></label>
+      <label for="measure_2">안전·보건 관리대책 2<textarea id="measure_2" rows="2"></textarea></label>
+      <label for="measure_3">안전·보건 관리대책 3<textarea id="measure_3" rows="2"></textarea></label>
+      <label for="ppe">안전보호구 사용계획<textarea id="ppe" rows="2"></textarea></label>
+    </div>
+    <p class="muted">현장 상황에 맞게 안전문구와 위험요인을 확인하고 수정해주세요.</p>
+  </section>
+  <button id="previous" type="button" class="wide" hidden>이전</button>
+  <button id="preview" type="button" class="primary wide" disabled>문서 미리보기</button>
+  <section id="doc" aria-labelledby="doc-title">
+    <h2 id="doc-title">3. 문서 미리보기·저장</h2>
+    <p id="preview-placeholder" class="muted">위쪽 기본정보와 세부유형을 확인하면 이곳에 최신 문서가 표시됩니다.</p>
+    <div id="preview-errors" role="alert" hidden></div>
+    <div id="preview-content" hidden>
+      <div class="alert warning use-notice"><span aria-hidden="true">ⓘ</span> 본 서류는 작성 지원을 위한 예시 자료입니다.<br>실제 작업 내용 및 현장 여건에 맞게 확인·수정 후 사용하시고,<br>최신 산업안전보건 관련 법령 및 소속 교육청 지침을 함께 확인하시기 바랍니다.</div>
+      <div class="document-actions">
+        <button id="window" type="button" disabled>미리보기 새창</button>
+        <a id="hwpx" class="button primary" role="button" aria-disabled="true" tabindex="-1"><span class="download-icon" aria-hidden="true">⇩</span> HWPX 다운로드 · 추천</a>
+        <a id="pdf" class="button" role="button" aria-disabled="true" tabindex="-1"><span class="download-icon" aria-hidden="true">⇩</span> PDF 다운로드</a>
+      </div>
+      <div class="download-notes"><p class="muted hwpx-note">한글 프로그램에서 원본 서식과 가장<br>동일하게 열립니다.</p></div>
+      <label for="preview_zoom">미리보기 확대<select id="preview_zoom"><option value="70">70%</option><option value="85" selected>85%</option><option value="100">100%</option></select></label>
+      <p id="page-count" class="muted"></p>
+      <div class="alert info pdf-notice">PDF는 웹 미리보기 기준으로 저장됩니다. 원본 서식과 가장 동일한 문서는 HWPX 다운로드를 이용해주세요.</div>
+      <p id="pdf-error" class="alert warning" hidden>PDF 생성에 실패했습니다. HWPX 다운로드 또는 미리보기 새창의 인쇄 기능을 이용해 주세요.</p>
+      <div id="document" class="document-host" aria-label="안전보건 문서 미리보기"></div>
+      <button id="edit_preview" type="button" class="wide">수정하러 가기</button>
+    </div>
+  </section>
+  <footer>문의: 홍산중학교 정성희(이음 쪽지)</footer>
+</main>
+</body>
+</html>
